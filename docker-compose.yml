@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: drone_db
+      POSTGRES_USER: drone_user
+      POSTGRES_PASSWORD: drone_pass
+    networks:
+      - drone_network
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DEBUG=1
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - POSTGRES_DB=drone_db
+      - POSTGRES_USER=drone_user
+      - POSTGRES_PASSWORD=drone_pass
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+    networks:
+      - drone_network
+
+networks:
+  drone_network:
+
+volumes:
+  postgres_data:

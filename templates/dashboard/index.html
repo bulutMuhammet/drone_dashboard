@@ -1,0 +1,329 @@
+{% extends "dashboard/layout.html" %}
+
+{% block content %}
+    <div class="dash-content ">
+        <div class="row justify-content-center">
+            <div id="message_div" class="mt-5 col-8">
+                <div id="nots">
+                    asdasd
+                </div>
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-success">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <div class="col-9  tabler mb-2 mt-1">
+                <h4><b>Takımım</b>: {{ request.user.staff.team }}</h4>
+            </div>
+
+            <div class="col-9 tabler pb-5 mt-4">
+                <h4 class="text-dark mt-5 mb-5 fw-bold">Üretilen Parçalar</h4>
+                <table id="parts-table" class="display text-dark mb-3">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Parça Türü</th>
+                        <th>İHA Modeli</th>
+                        <th>Kullanılıyor mu</th>
+                        <th>Seri Numarası</th>
+                        <th>Oluşturulma Tarihi</th>
+                        <th>Güncelle</th>
+                        <th>Sil</th>
+
+                    </tr>
+                    </thead>
+                </table>
+
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="new_part_modal" tabindex="-1" aria-labelledby="new_part_modalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="new_part_modalLabel">Yeni Parça Üret ({{ request.user.staff.team.part }})</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <select name="drone_opt" id="drone_opt" class="form-select">
+
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                    <button type="button" class="btn btn-primary" id="produce_part">Üret</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="edit_part_modal" part_id="" tabindex="-1" aria-labelledby="edit_partLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="new_part_modalLabel">Drone Modelini Güncelle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <select name="edit_part" id="edit_part" class="form-select">
+
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                    <button type="button" class="btn btn-primary" id="edit_part_btn">Güncelle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script>
+
+
+        $(document).ready(function () {
+            var message_div = document.getElementById("message_div")
+            var nots = document.getElementById("nots")
+
+            var dt = $('#parts-table').DataTable({
+
+                serverSide: true,
+                processing: true,
+                columnDefs: [
+                    {
+                        "targets": [-2, -1], // Son iki sütuna hedef belirleyin (Güncelle, Sil sütunları)
+                        "orderable": false, // Sıralama özelliğini kapalı yapın
+                        "searchable": false // Arama özelliğini kapalı yapın
+                    }
+                ],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/tr.json',
+                },
+                ajax: {
+                    url: '/api/drone/parts/',
+                    type: 'GET',
+                    dataSrc: 'results',
+                    data: function (params) {
+                        var columnNames = [
+                            'id',
+                            'part_name',
+                            'drone_name',
+                            'is_used',
+                            'serial_number',
+                            'created_at'
+                        ];
+                        var orderingColumn = columnNames[params.order[0].column];
+                        var orderingDirection = params.order[0].dir === 'desc' ? '' : '-';
+
+
+                        return {
+                            search: params.search.value,
+                            ordering: orderingDirection + orderingColumn,
+                            ordering_direction: params.order[0].dir,
+                            page: Math.floor(params.start / params.length) + 1,  // Start parametresini 10'a böl
+                            page_size: params.length
+
+                        };
+                    },
+
+                },
+                columns: [
+                    {data: 'id'},
+                    {data: 'part_name'},
+                    {data: 'drone_name'},
+                    {
+                        data: 'is_used',
+                        render: function (data, type, row) {
+                            if (data) return "Evet"
+                            else return "Hayır"
+                        }
+                    },
+                    {data: 'serial_number'},
+                    {
+                        data: 'created_at',
+                        render: function (data, type, row) {
+                            var startDate = new Date(data);
+                            return startDate.toLocaleDateString();
+                        }
+                    },
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return "<button class='edit-btn btn btn-info text-white'>Güncelle</button>";
+                        }
+                    },
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return "<button class='delete-btn btn btn-danger'>Sil</button>";
+                        }
+                    }
+                ],
+                lengthMenu: [10, 25, 50, 75, 100],
+                pageLength: 10,
+
+            });
+
+
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            function notification(){
+                $("#nots").empty();
+                $.ajax({
+                    url: '/api/drone/assembly-stock-check/', // DRF API endpoint
+                    method: 'GET',
+                    success: function (data) {
+                        console.log(data)
+                      data.drones.forEach(value => {
+                          console.log(value)
+                          nots.innerHTML += `
+                        <div class="alert alert-danger">
+                                ${value} için <b>${data.part}</b> eksik !
+                        </div>`
+                      })
+
+
+                    },
+                    error: function (xhr, status, error) {
+
+                    }
+                });
+            }
+
+            notification()
+
+            $('#produce_part').on("click", () => {
+                var csrftoken = getCookie('csrftoken');
+                var drone_id = document.getElementById("drone_opt").value
+
+                $.ajax({
+                    url: "/api/drone/parts/",
+                    type: "POST",
+                    headers: {"X-CSRFToken": csrftoken}, // CSRF token'ı başlıkta gönderin
+                    data: {drone: parseInt(drone_id)},
+                    success: function (response) {
+                        $('#new_part_modal').modal('toggle')
+                        dt.ajax.reload();
+                        message_div.innerHTML += `
+                        <div class="alert alert-success"> Başarıyla Eklendi
+                          <button type="button" class="btn-close float-end" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>`
+                        notification()
+
+
+                    },
+                    error: function (xhr, status, error) {
+                        message_div.innerHTML += `
+                        <div class="alert alert-danger">${xhr.responseText}
+                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>`
+                    }
+                });
+            })
+            $.ajax({
+                url: '/api/drone/',  // DRF API endpoint
+                method: 'GET',
+                success: function (data) {
+                    const drone_select = $('#drone_opt');
+                    const edit_part = $('#edit_part');
+                    data.forEach(function (drone) {
+                        drone_select.append($('<option>', {
+                            value: drone.id,
+                            text: drone.name
+                        }));
+                        edit_part.append($('<option>', {
+                            value: drone.id,
+                            text: drone.name
+                        }));
+                    });
+
+                },
+                error: function (error) {
+
+                    console.error('API request failed:', error);
+                }
+            });
+
+
+            $('#parts-table').on('click', '.delete-btn', function () {
+                var table = $('#parts-table').DataTable();
+                var row = $(this).closest('tr');
+                var id = row[0].children[0].innerHTML
+
+                var confirmation = confirm("Bu satırı silmek istediğinizden emin misiniz?");
+                if (confirmation) {
+                    var csrftoken = getCookie('csrftoken');
+                    $.ajax({
+                        url: "/api/drone/parts/" + id + '/',
+                        type: "DELETE",
+                        headers: {"X-CSRFToken": csrftoken}, // CSRF token'ı başlıkta gönderin
+
+                        success: function (response) {
+                            table.row(row).remove().draw();
+                            notification()
+                        },
+                        error: function (xhr, status, error) {
+                            console.log(error);
+                        }
+                    });
+                }
+            });
+
+            $('#parts-table').on('click', '.edit-btn', function () {
+                var row = $(this).closest('tr');
+                var id = row[0].children[0].innerHTML
+
+                $('#edit_part_modal').modal("toggle")
+                $('#edit_part_modal').attr("part_id", id)
+
+
+            });
+
+            $('#edit_part_btn').on("click", () => {
+                var csrftoken = getCookie('csrftoken');
+                var drone_id = document.getElementById("edit_part").value
+                var part_id = document.getElementById("edit_part_modal").getAttribute("part_id")
+
+                $.ajax({
+                    url: "/api/drone/parts/" + part_id + "/",
+                    type: "PUT",
+                    headers: {"X-CSRFToken": csrftoken}, // CSRF token'ı başlıkta gönderin
+                    data: {drone: parseInt(drone_id)},
+                    success: function (response) {
+                        $('#edit_part_modal').modal('toggle')
+                        dt.ajax.reload();
+                        message_div.innerHTML = `
+                        <div class="alert alert-success"> Başarıyla Güncellendi
+                          <button type="button" class="btn-close float-end" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>`
+                        notification()
+
+                    },
+                    error: function (xhr, status, error) {
+                        message_div.innerHTML = `
+                        <div class="alert alert-danger">${xhr.responseText}
+                          <button type="button" class="btn-close float-end" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>`
+                    }
+                });
+            })
+
+        });
+    </script>
+{% endblock %}

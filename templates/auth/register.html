@@ -1,0 +1,80 @@
+{% extends "auth/layout.html" %}
+
+{% block which_page %}
+    <li class="nav-item">
+        <a class="nav-link " href="{% url "login" %}">Giriş Yap</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" aria-current="page" href="{% url "register" %}">Kayıt Ol</a>
+    </li>
+{% endblock %}
+{% block content %}
+
+    <div class="container-fluid ">
+        <div class="row justify-content-center">
+            <div class="col-3 content text-white  p-5">
+                <h3 class="text-center">Kayıt Ol</h3>
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        {{ form.errors }}
+                    </div>
+                {% endif %}
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="name" class="form-label required">Ad</label>
+                        <input type="text" required class="form-control" id="name" name="first_name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="surname" class="form-label required">Soyad</label>
+                        <input type="text" required class="form-control" id="surname" name="last_name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label required">Eposta Adresi</label>
+                        <input type="email" required class="form-control" id="email" name="email">
+                    </div>
+                    <div class="mb-3">
+                        <label for="team" class="form-label required">Takım</label>
+                        <select required class="form-control" id="team" name="team">
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label required">Parola</label>
+                        <input type="password" required class="form-control" id="password" name="password1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password2" class="form-label required">Parolayı Doğrula</label>
+                        <input type="password" required class="form-control" id="password2" name="password2">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary col-12 mt-3">Kaydol</button>
+                    <div class="form-text mb-3">Zaten hesabın var mı? <a href="{% url "login" %}"
+                                                                         class="link-secondary">Giriş Yap</a></div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: '/api/accounts/teams/',  // DRF API endpoint
+                method: 'GET',
+                success: function (data) {
+                    const teamSelect = $('#team');
+                    data.forEach(function (team) {
+                        teamSelect.append($('<option>', {
+                            value: team.id,  // Değer olarak takım adını kullan
+                            text: team.name    // Görünen metin olarak takım adını kullan
+                        }));
+                    });
+                },
+                error: function (error) {
+                    console.error('API request failed:', error);
+                }
+            });
+        });
+    </script>
+{% endblock %}

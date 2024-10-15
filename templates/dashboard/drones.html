@@ -1,0 +1,162 @@
+{% extends "dashboard/layout.html" %}
+
+{% block content %}
+    <div class="dash-content ">
+        <div class="row justify-content-center">
+            <div id="message_div" class="mt-5 col-9">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-success">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <div class="col-9  tabler mb-2 mt-1">
+                <h4><b>Takımım</b>: {{ request.user.staff.team }}</h4>
+            </div>
+            <div class="col-9 tabler pb-5 mt-5">
+                <h4 class="text-dark mt-5 mb-5 fw-bold">Üretilen İHA'lar</h4>
+                <table id="drone-table" class="display text-dark mb-3">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>İHA Modeli</th>
+                        <th>Parçalar Detaylı</th>
+                        <th>Kullanılan Parçalar</th>
+                        <th>Seri Numarası</th>
+                        <th>Oluşturulma Tarihi</th>
+
+
+                    </tr>
+                    </thead>
+                </table>
+
+
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="parts_modal"  tabindex="-1" aria-labelledby="parts_modalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="new_part_modalLabel">Bu İHA'da Kullanılan Parçalar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul id="parts-list" class="list-group">
+
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script>
+
+
+        $(document).ready(function () {
+            var message_div = document.getElementById("message_div")
+
+
+            $('#drone-table').DataTable({
+
+                serverSide: true,
+                processing: true,
+                columnDefs: [
+                    {
+                        "targets": [-2, -1], // Son iki sütuna hedef belirleyin (Güncelle, Sil sütunları)
+                        "orderable": false, // Sıralama özelliğini kapalı yapın
+                        "searchable": false // Arama özelliğini kapalı yapın
+                    }
+                ],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/tr.json',
+                },
+                ajax: {
+                    url: '/api/drone/items/',
+                    type: 'GET',
+                    dataSrc: 'results',
+                    data: function (params) {
+                        var columnNames = [
+                            'id',
+                            'drone_name',
+                            'parts_name',
+                            'serial_number',
+                            'created_at'
+                        ];
+                        var orderingColumn = columnNames[params.order[0].column];
+                        var orderingDirection = params.order[0].dir === 'desc' ? '' : '-';
+
+
+                        return {
+                            search: params.search.value,
+                            ordering: orderingDirection + orderingColumn,
+                            ordering_direction: params.order[0].dir,
+                            page: Math.floor(params.start / params.length) + 1,  // Start parametresini 10'a böl
+                            page_size: params.length
+
+                        };
+                    },
+
+                },
+                columns: [
+                    {data: 'id'},
+                    {data: 'drone_name'},
+                    {data: 'parts_name', visible: false},
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return "<button class='view-btn btn btn-primary text-white' data-bs-toggle='modal' data-bs-target='#parts_modal'>Görüntüle</button>";
+                        }
+                    },
+                    {data: 'serial_number'},
+                    {
+                        data: 'created_at',
+                        render: function (data, type, row) {
+                            var startDate = new Date(data);
+                            return startDate.toLocaleDateString();
+                        }
+                    },
+
+                ],
+                lengthMenu: [10, 25, 50, 75, 100],
+                pageLength: 10,
+
+            });
+
+            $('#drone-table').on('click', '.view-btn', function () {
+                var row = $(this).closest('tr');
+                var rowData = $('#drone-table').DataTable().row(row).data(); // Satır verilerini al
+
+                rowData.parts_name.forEach(function (part) {
+                    $('#parts-list').append('<li class="list-group-item">' + part.part_name + ' (Seri No: ' + part.serial_number + ')</li>');
+                });
+
+
+
+
+            });
+
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+
+        });
+    </script>
+{% endblock %}

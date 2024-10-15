@@ -1,0 +1,64 @@
+body{
+    font-family: 'Ubuntu', serif !important;
+    font-style: normal !important;
+    background-color: #ffffff;
+}
+
+nav{
+    background-color: #0A151A;
+}
+
+.content{
+    margin-top: 8rem;
+    background-color: #0b181e;
+    border-radius: 30px;
+}
+
+
+
+.required:after {
+    content:" *";
+}
+
+
+.sidebar {
+    margin: 0;
+    padding: 0;
+    width: 300px;
+    background-color: #0b181e;
+    position: fixed;
+    height: 100%;
+    overflow: auto;
+}
+.sidebar a {
+    display: block;
+    color: white;
+    padding: 9px 16px;
+    margin-bottom: 1rem;
+    text-decoration: none;
+
+}
+.sidebar a.active {
+    background-color: #3882a9;
+    color: white;
+    border-radius: 15px;
+}
+
+.sidebar .links a{
+    padding-left: 1.5rem;
+}
+
+.dash-content {
+    margin-left: 300px;
+    padding: 1px 16px;
+    height: 1000px;
+
+}
+
+.tabler{
+    margin-top: 10rem;
+    padding-right: 5rem;
+    padding-left: 5rem;
+    border-radius: 20px;
+    background-color: white;
+}
