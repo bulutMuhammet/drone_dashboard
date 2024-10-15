@@ -101,7 +101,7 @@ WSGI_APPLICATION = 'drone_dashboard.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 
-# Activate it for docker setup
+# Activate it for manuel setup
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -109,7 +109,7 @@ DATABASES = {
     }
 }
 
-# Activate it for sqlite setup
+# Activate it for docker setup
 
 # DATABASES = {
 #     'default': {
