@@ -21,9 +21,10 @@
                         <th>ID</th>
                         <th>İHA Modeli</th>
                         <th>Parçalar Detaylı</th>
-                        <th>Kullanılan Parçalar</th>
                         <th>Seri Numarası</th>
                         <th>Oluşturulma Tarihi</th>
+                        <th>Kullanılan Parçalar</th>
+
 
 
                     </tr>
@@ -66,13 +67,7 @@
 
                 serverSide: true,
                 processing: true,
-                columnDefs: [
-                    {
-                        "targets": [-2, -1], // Son iki sütuna hedef belirleyin (Güncelle, Sil sütunları)
-                        "orderable": false, // Sıralama özelliğini kapalı yapın
-                        "searchable": false // Arama özelliğini kapalı yapın
-                    }
-                ],
+                
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/tr.json',
                 },
@@ -107,18 +102,19 @@
                     {data: 'id'},
                     {data: 'drone_name'},
                     {data: 'parts_name', visible: false},
-                    {
-                        "data": null,
-                        "render": function (data, type, row) {
-                            return "<button class='view-btn btn btn-primary text-white' data-bs-toggle='modal' data-bs-target='#parts_modal'>Görüntüle</button>";
-                        }
-                    },
+                    
                     {data: 'serial_number'},
                     {
                         data: 'created_at',
                         render: function (data, type, row) {
                             var startDate = new Date(data);
                             return startDate.toLocaleDateString();
+                        }
+                    },
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return "<button class='view-btn btn btn-primary text-white' data-bs-toggle='modal' data-bs-target='#parts_modal'>Görüntüle</button>";
                         }
                     },
 

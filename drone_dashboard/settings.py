@@ -102,25 +102,25 @@ WSGI_APPLICATION = 'drone_dashboard.wsgi.application'
 
 
 # Activate it for docker setup
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 # Activate it for sqlite setup
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'drone_db',
-        'USER': 'drone_user',
-        'PASSWORD': 'drone_pass',
-        'HOST': 'db',
-        'PORT': '5432',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'drone_db',
+#         'USER': 'drone_user',
+#         'PASSWORD': 'drone_pass',
+#         'HOST': 'db',
+#         'PORT': '5432',
+#     }
+# }
 
 
 

@@ -7,10 +7,9 @@ from drone.models import PartItem, DroneItem
 # arama filtresi
 class PartItemSearchFilter(SearchFilter):
     def get_search_fields(self, view, request):
-        return ['part__name', 'drone__name', 'serial_number', 'created_at', 'id']
+        return ['part__name', 'drone__name', 'serial_number', 'created_at']
 
 
-from django_filters import rest_framework as filters
 
 class PartItemFilter(filters.FilterSet):
     ordering = filters.OrderingFilter(
@@ -41,7 +40,7 @@ class DroneItemFilter(filters.FilterSet):
 
     class Meta:
         model = DroneItem
-        fields = ['serial_number','drone', 'created_at', 'id']
+        fields = ['serial_number', 'drone', 'created_at', 'id']
 
 class DroneItemSearchFilter(SearchFilter):
     def get_search_fields(self, view, request):

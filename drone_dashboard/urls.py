@@ -21,7 +21,7 @@ from drf_yasg.views import get_schema_view
 
 schema_view = get_schema_view(
    openapi.Info(
-      title="Orphex Case Study Django API",
+      title="Drone Dashboard Django API",
       default_version='v1',
       description="This is the documentation for API. You can use endpoints directly from this page or Postman",
    ),

@@ -17,7 +17,7 @@ class PartItemListCreateView(generics.ListCreateAPIView):
     serializer_class = PartItemSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = Pagination
-    filter_backends = [PartItemSearchFilter, DjangoFilterBackend, filters.OrderingFilter]
+    filter_backends = [PartItemSearchFilter, filters.OrderingFilter]
     filterset_class = PartItemFilter  # FilterSet sınıfını burada belirtiyoruz
 
     def get_queryset(self):
@@ -46,7 +46,7 @@ class DroneItemListView(generics.ListAPIView):
     queryset = DroneItem.objects.all()
 
     pagination_class = Pagination
-    filter_backends = [DroneItemSearchFilter, DjangoFilterBackend, filters.OrderingFilter]
+    filter_backends = [DroneItemSearchFilter, filters.OrderingFilter]
     filterset_class = DroneItemFilter  #
 
 
